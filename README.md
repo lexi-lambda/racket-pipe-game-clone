@@ -9,6 +9,8 @@ This is a partial clone of a game currently in development by [Natalie Frost](ht
 
 The main file to run is `main.rkt`. You will need to be running at least Racket version 6.1.1.8, which is only available as a snapshot build as of this writing. This uses some Typed Racket features such as the object system and improved pict support that are not available in 6.1.1 or earlier.
 
+This also depends on the `2htdp-typed` package (which is my own), which is included as a dependency in the `info.rkt` file. Installing this repository as a package will automatically install the required dependency.
+
 ## The philosophy of this project
 
 I laid out a couple of guidelines for myself when working on this.
