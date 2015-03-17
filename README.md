@@ -17,7 +17,7 @@ I laid out a couple of guidelines for myself when working on this.
 
   1. **There is no mutable state.** None at all. The game is written in a purely functional style. This does mean, unfortunately, doing a lot of unnecessary copying which Racket can almost certainly *not* optimize out—it's not that clever. That said, the game should still be performant considering its simplicity.
   2. **There are no external assets.** All of the graphics for the game are generated entirely at runtime. In this case, I decided to use Racket's pict library, which is fairly fully-featured and suited my needs.
-  3. **Code is modular and decoupled.** This is a sort of silly goal since this project is so small, anyway. There are really only two files that do anything serious, and they definitely have some non-trivial coupling between them. Still, I think the code can be understand in independent units, and I think it's flexible enough to modify parts of the system without breaking the rest of it.
+  3. **Code is modular and decoupled.** This is a sort of silly goal since this project is so small, anyway. There are really only two files that do anything serious, and they definitely have some non-trivial coupling between them. Still, I think the code can be understood in independent units, and I think it's flexible enough to modify parts of the system without breaking the rest of it.
   4. **All the logic is expressive!** This is really the end goal, which should be the result of the above points. I think Racket is a very expressive language, and I want to let that shine through while still making a semi-performant game.
 
 ## Game structure
