@@ -1,10 +1,11 @@
 #lang racket/base
 
 (require
-  racket/vector
+  alexis/collection
+  alexis/pvector
   racket/function
   racket/match
-  typed/pict
+  pict
   "constants.rkt"
   "utils.rkt"
   "shapes.rkt")
@@ -67,7 +68,7 @@
 ; The initial tile grid is hardcoded. It could be procedurally generated, but for now, it's easier
 ; to just hardcode things to avoid needing to tune the algorithm.
 (define starting-tile-grid
-  (vector-immutable
+  (pvector
    (tile 'l 0 'green)  (tile 'l 1 'grey)   (tile 'l 3 'red)   (tile 'i 0 'yellow) (tile 'i 1 'grey)   (tile 'l 3 'red)
    (tile 'i 1 'grey)   (tile 'l 1 'red)    (tile 'l 3 'grey)  (tile 'l 0 'red)    (tile 'i 0 'red)    (tile 'l 3 'yellow)
    (tile 'i 1 'grey)   (tile 'l 0 'yellow) (tile 'l 1 'green) (tile 'l 2 'yellow) (tile 'l 1 'green)  (tile 'l 2 'grey)
@@ -93,34 +94,33 @@
 ; It returns the new tile grid as well as hash table of the tiles and their old positions in
 ; pixel offsets relative to their new positions (this is used for animation).
 (define (tile-grid-pivot tg px py)
-  (define new-grid (vector-copy tg))
   ; first get the indicies...
   (let ([ai (tile-grid-point->index px        py)]
         [bi (tile-grid-point->index (add1 px) py)]
         [ci (tile-grid-point->index (add1 px) (add1 py))]
         [di (tile-grid-point->index px        (add1 py))])
     ; then get the values...
-    (let ([a (vector-ref tg ai)]
-          [b (vector-ref tg bi)]
-          [c (vector-ref tg ci)]
-          [d (vector-ref tg di)])
-      ; then rotate them...
-      (vector-set! new-grid ai d)
-      (vector-set! new-grid bi a)
-      (vector-set! new-grid ci b)
-      (vector-set! new-grid di c)
-      ; and finally, make the result immutable and return the offset information
-      (values (vector->immutable-vector new-grid)
-              (make-immutable-hasheq `((,a . (-64.   0.))
-                                       (,b . (  0. -64.))
-                                       (,c . ( 64.   0.))
-                                       (,d . (  0.  64.))))))))
+    (let ([a (nth tg ai)]
+          [b (nth tg bi)]
+          [c (nth tg ci)]
+          [d (nth tg di)])
+      ; and finally, rotate them and return the offset information
+      (values (set-nth* tg
+                        ai d
+                        bi a
+                        ci b
+                        di c)
+              (make-immutable-hasheq
+               `((,a . (-64.   0.))
+                 (,b . (  0. -64.))
+                 (,c . ( 64.   0.))
+                 (,d . (  0.  64.))))))))
 
 ; Converts a tile grid and a table of tile offsets to a renderable pict.
 (define (tile-grid->pict tg offsets)
   ; we start with a completely blank board and overlay tiles on top
   (for/fold ([board (blank (* 64 6) (* 64 6))])
-            ([tile (in-vector tg)]
+            ([tile (in tg)]
              [i (in-naturals)])
     ; the actual x and y coordinates can be derived from the linear index
     (match-let-values ([(y x) (quotient/remainder i 6)]

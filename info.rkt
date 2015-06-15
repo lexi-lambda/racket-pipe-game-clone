@@ -4,8 +4,10 @@
 
 (define deps
   '("base"
-    "typed-racket-lib"
-    "typed-racket-more"
-    "2htdp-typed"))
+    "alexis-collections"
+    "alexis-pvector"
+    "draw-lib"
+    "htdp-lib"
+    "pict-lib"))
 (define build-deps
   '())
