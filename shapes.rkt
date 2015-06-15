@@ -1,13 +1,14 @@
-#lang typed/racket/base
+#lang racket/base
 
 (provide
  pipe-l pipe-i
  tile-base
  spin-button)
 
-(require typed/pict
-         "constants.rkt"
-         "utils.rkt")
+(require
+  pict
+  "constants.rkt"
+  "utils.rkt")
 
 ;; "pipe" graphics -- pipes come in two shapes, I and L
 ;; ---------------------------------------------------------------------------------------------------

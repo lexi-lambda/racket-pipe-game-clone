@@ -1,4 +1,4 @@
-#lang typed/racket/base
+#lang racket/base
 
 (provide
  revolutions->radians
@@ -9,17 +9,15 @@
 (require (for-syntax racket/base
                      syntax/parse)
          racket/math
-         typed/pict)
+         pict)
 
 ;; math-y helper functions
 ;; ---------------------------------------------------------------------------------------------------
 
-(: revolutions->radians (Float -> Float))
 (define (revolutions->radians revs)
   (* revs 2 pi))
 
 ; Just a nice little helper function to check if two points are within a certain distance apart.
-(: in-radius? (Float Float Float Float Float -> Boolean))
 (define (in-radius? x1 y1 x2 y2 r)
   (let ([dx (- x1 x2)]
         [dy (- y1 y2)])
@@ -28,7 +26,6 @@
 ;; freeze -- renders to bitmaps then converts back to picts
 ;; ---------------------------------------------------------------------------------------------------
 
-(: freeze (pict -> pict))
 (define (freeze pict)
   (bitmap (pict->bitmap pict)))
 

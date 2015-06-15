@@ -1,11 +1,12 @@
-#lang typed/racket/base
+#lang racket/base
 
 (provide
  pipe-color-grey pipe-color-red pipe-color-yellow pipe-color-green
  tile-color-bg tile-color-fg)
 
-(require typed/racket/class
-         typed/racket/draw)
+(require
+  racket/class
+  racket/draw)
 
 ;; color constants
 ;; ---------------------------------------------------------------------------------------------------

@@ -1,16 +1,16 @@
-#lang typed/racket/base
+#lang racket/base
 
-(require racket/vector
-         racket/function
-         racket/match
-         typed/pict
-         "constants.rkt"
-         "utils.rkt"
-         "shapes.rkt")
+(require
+  racket/vector
+  racket/function
+  racket/match
+  typed/pict
+  "constants.rkt"
+  "utils.rkt"
+  "shapes.rkt")
 
 (provide
  (struct-out tile)
- Tile-Grid Tile-Offsets
  tile->pict
  starting-tile-grid
  accumulate-tile-offsets
@@ -20,27 +20,25 @@
 ;; tile data
 ;; ---------------------------------------------------------------------------------------------------
 
-(struct tile ([type : (U 'l 'i)]
-              [rotation : Integer]
-              [color : (U 'grey 'red 'green 'yellow)])
+(struct tile (type rotation color)
   #:transparent)
 
 ; cache the bitmaps to prevent recalculating them every frame
-(define tile-cache : (HashTable tile pict)
+(define tile-cache
   (make-hash '()))
 
 ; Converting a tile type to a pict is easy—just look up the appropriate shape.
-(define (tile-type->pict [t : (U 'l 'i)])
+(define (tile-type->pict t)
   (case t
     [(l) pipe-l]
     [(i) pipe-i]))
 
 ; Each integral "rotation" is equivalent to a 90º spin.
-(define (tile-rotation->radians [t : Float])
+(define (tile-rotation->radians t)
   (revolutions->radians (* 1/4 t)))
 
 ; Tile color lookups are similarly straightforward.
-(define (tile-color->color [t : (U 'grey 'red 'yellow 'green)])
+(define (tile-color->color t)
   (case t
     [(grey)   pipe-color-grey]
     [(red)    pipe-color-red]
@@ -49,7 +47,7 @@
 
 ; Converting a tile to a pict simply grabs the appropriate graphic, colors it, rotates it, and
 ; overlays it atop the generic tile base. Tile graphics are cached to avoid recalculation.
-(define (tile->pict [t : tile])
+(define (tile->pict t)
   (hash-ref!
    tile-cache t
    (λ ()
@@ -66,15 +64,9 @@
 ;; tile grid
 ;; ---------------------------------------------------------------------------------------------------
 
-; A Tile-Grid is simply a vector of length 36 containing tile data.
-(define-type Tile-Grid (Vectorof tile))
-; A Tile-Offsets map contains information about how tile move around the grid. This data needs to be
-; exposed by the data layer so that the rendering layer can perform animation.
-(define-type Tile-Offsets (HashTable tile (List Float Float)))
-
 ; The initial tile grid is hardcoded. It could be procedurally generated, but for now, it's easier
 ; to just hardcode things to avoid needing to tune the algorithm.
-(define starting-tile-grid : Tile-Grid
+(define starting-tile-grid
   (vector-immutable
    (tile 'l 0 'green)  (tile 'l 1 'grey)   (tile 'l 3 'red)   (tile 'i 0 'yellow) (tile 'i 1 'grey)   (tile 'l 3 'red)
    (tile 'i 1 'grey)   (tile 'l 1 'red)    (tile 'l 3 'grey)  (tile 'l 0 'red)    (tile 'i 0 'red)    (tile 'l 3 'yellow)
@@ -85,12 +77,10 @@
 
 ; Simply converts (x, y) coordinates to linear coordinates. This is easy since the grid is a fixed
 ; size.
-(: tile-grid-point->index (Integer Integer -> Integer))
 (define (tile-grid-point->index x y)
   (+ x (* y 6)))
 
 ; This adds two sets of tile offsets together via simple addition.
-(: accumulate-tile-offsets (Tile-Offsets Tile-Offsets -> Tile-Offsets))
 (define (accumulate-tile-offsets offsets new-offsets)
   (for/fold ([offsets offsets])
             ([(tile new-offset) new-offsets])
@@ -102,7 +92,6 @@
 ; at the provided x and y coordinates.
 ; It returns the new tile grid as well as hash table of the tiles and their old positions in
 ; pixel offsets relative to their new positions (this is used for animation).
-(: tile-grid-pivot (Tile-Grid Integer Integer -> (Values Tile-Grid Tile-Offsets)))
 (define (tile-grid-pivot tg px py)
   (define new-grid (vector-copy tg))
   ; first get the indicies...
@@ -128,7 +117,6 @@
                                        (,d . (  0.  64.))))))))
 
 ; Converts a tile grid and a table of tile offsets to a renderable pict.
-(: tile-grid->pict (Tile-Grid Tile-Offsets -> pict))
 (define (tile-grid->pict tg offsets)
   ; we start with a completely blank board and overlay tiles on top
   (for/fold ([board (blank (* 64 6) (* 64 6))])
